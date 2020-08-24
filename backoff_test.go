@@ -24,12 +24,13 @@ func TestConstantBackoffNext(t *testing.T) {
 }
 
 func TestConstantBackoffNextNoJitter(t *testing.T) {
-	backoff := NewConstantBackoff(100*time.Millisecond, 0)
+	wait := 100 * time.Millisecond
+	backoff := NewConstantBackoff(wait, 0)
 
 	assert.Equal(t, zeroDuration, backoff.Next(0))
 
 	for i := 1; i < 100; i++ {
-		assert.Equal(t, 100*time.Millisecond, backoff.Next(i))
+		assert.Equal(t, wait, backoff.Next(i))
 	}
 }
 
