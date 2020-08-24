@@ -36,15 +36,19 @@ func TestExponentialBackoffNext(t *testing.T) {
 	assert.Equal(t, 0*time.Millisecond, n)
 
 	n = backoff.Next(1)
+	assert.True(t, 2*time.Millisecond <= n)
+	assert.True(t, n <= 3*time.Millisecond)
+
+	n = backoff.Next(2)
 	assert.True(t, 4*time.Millisecond <= n)
 	assert.True(t, n <= 5*time.Millisecond)
 
-	n = backoff.Next(2)
+	n = backoff.Next(3)
 	assert.True(t, 8*time.Millisecond <= n)
 	assert.True(t, n <= 9*time.Millisecond)
 
 	// Next times, the maximum wait time will be reached
-	for i := 3; i < 100; i++ {
+	for i := 4; i < 100; i++ {
 		assert.Equal(t, 10*time.Millisecond, backoff.Next(i))
 	}
 }
@@ -53,11 +57,12 @@ func TestExponentialBackoffNextNoJitter(t *testing.T) {
 	backoff := NewExponentialBackoff(2*time.Millisecond, 10*time.Millisecond, 0)
 
 	assert.Equal(t, 0*time.Millisecond, backoff.Next(0))
-	assert.Equal(t, 4*time.Millisecond, backoff.Next(1))
-	assert.Equal(t, 8*time.Millisecond, backoff.Next(2))
+	assert.Equal(t, 2*time.Millisecond, backoff.Next(1))
+	assert.Equal(t, 4*time.Millisecond, backoff.Next(2))
+	assert.Equal(t, 8*time.Millisecond, backoff.Next(3))
 
 	// Next times, the maximum wait time will be reached
-	for i := 3; i < 100; i++ {
+	for i := 4; i < 100; i++ {
 		assert.Equal(t, 10*time.Millisecond, backoff.Next(i))
 	}
 }

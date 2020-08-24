@@ -52,7 +52,7 @@ func (b *exponentialBackoff) Next(attempt int) time.Duration {
 		return 0 * time.Millisecond
 	}
 	// Make sure we don't overflow the time.Duration (int64)
-	wait := float64(b.minWait) * math.Pow(2.0, float64(attempt)) // nolint
+	wait := float64(b.minWait) * math.Pow(2.0, float64(attempt-1)) // nolint
 	if float64(maxDuration) < wait {
 		return b.maxWait
 	}
