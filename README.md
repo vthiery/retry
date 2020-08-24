@@ -36,10 +36,9 @@ func main() {
 		retry.WithMaxAttempts(10),
 		retry.WithBackoff(
 			retry.NewExponentialBackoff(
-				100*time.Millisecond, // initialWait
+				100*time.Millisecond, // minWait
 				1*time.Second,        // maxWait
-				2.0,                  // exponentFactor
-				2*time.Millisecond,   // maximumJitterInterval
+				2*time.Millisecond,   // maxJitter
 			),
 		),
 	)
