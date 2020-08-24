@@ -7,12 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const zeroDuration = time.Duration(0)
+
 func TestConstantBackoffNext(t *testing.T) {
 	wait := 100 * time.Millisecond
 	maxJitter := 50 * time.Millisecond
 	backoff := NewConstantBackoff(wait, maxJitter)
 
-	assert.Equal(t, 0*time.Millisecond, backoff.Next(0))
+	assert.Equal(t, zeroDuration, backoff.Next(0))
 
 	for i := 1; i < 100; i++ {
 		n := backoff.Next(i)
@@ -24,10 +26,20 @@ func TestConstantBackoffNext(t *testing.T) {
 func TestConstantBackoffNextNoJitter(t *testing.T) {
 	backoff := NewConstantBackoff(100*time.Millisecond, 0)
 
-	assert.Equal(t, 0*time.Millisecond, backoff.Next(0))
+	assert.Equal(t, zeroDuration, backoff.Next(0))
 
 	for i := 1; i < 100; i++ {
 		assert.Equal(t, 100*time.Millisecond, backoff.Next(i))
+	}
+}
+
+func TestConstantBackoffNextNegativeDurations(t *testing.T) {
+	wait := -100 * time.Millisecond
+	maxJitter := -50 * time.Millisecond
+	backoff := NewConstantBackoff(wait, maxJitter)
+
+	for i := 0; i < 100; i++ {
+		assert.Equal(t, zeroDuration, backoff.Next(i))
 	}
 }
 
@@ -74,9 +86,20 @@ func TestExponentialBackoffNextNoJitter(t *testing.T) {
 	}
 }
 
+func TestExponentialBackoffNextNegativeDurations(t *testing.T) {
+	minWait := -2 * time.Millisecond
+	maxWait := -10 * time.Millisecond
+	maxJitter := -1 * time.Millisecond
+	backoff := NewExponentialBackoff(minWait, maxWait, maxJitter)
+
+	for i := 0; i < 100; i++ {
+		assert.Equal(t, zeroDuration, backoff.Next(i))
+	}
+}
+
 func TestJitter(t *testing.T) {
-	assert.Equal(t, time.Duration(0), jitter(time.Duration(-42)))
-	assert.Equal(t, time.Duration(0), jitter(time.Duration(0)))
+	assert.Equal(t, zeroDuration, jitter(time.Duration(-42)))
+	assert.Equal(t, zeroDuration, jitter(zeroDuration))
 
 	assert.True(t, jitter(time.Duration(42)) <= time.Duration(42))
 }
