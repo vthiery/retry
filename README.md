@@ -1,5 +1,9 @@
 # Retry
 
+[![PkgGoDev](https://pkg.go.dev/badge/vthiery/retry)](https://pkg.go.dev/vthiery/retry)
+![Build Status](https://github.com/vthiery/retry/workflows/Test/badge.svg)
+![GolangCI Lint](https://github.com/vthiery/retry/workflows/GolangCI/badge.svg)
+
 ## Description
 
 Yet another retrier \o/
