@@ -11,15 +11,15 @@ func init() {
 }
 
 type constantBackoff struct {
-	backoffInterval       int64
-	maximumJitterInterval int64
+	wait      time.Duration
+	maxJitter time.Duration
 }
 
 // NewConstantBackoff returns an instance of ConstantBackoff.
-func NewConstantBackoff(backoffInterval, maximumJitterInterval time.Duration) Backoff {
+func NewConstantBackoff(wait, maxJitter time.Duration) Backoff {
 	return &constantBackoff{
-		backoffInterval:       int64(backoffInterval / time.Millisecond),
-		maximumJitterInterval: int64(maximumJitterInterval / time.Millisecond),
+		wait:      maxDuration(wait, 0),
+		maxJitter: maxDuration(maxJitter, 0),
 	}
 }
 
@@ -28,39 +28,56 @@ func (b *constantBackoff) Next(attempt int) time.Duration {
 	if attempt <= 0 {
 		return 0 * time.Millisecond
 	}
-	delay := time.Duration(b.backoffInterval)
-	jitter := time.Duration(rand.Int63n(b.maximumJitterInterval))
-	return (delay + jitter) * time.Millisecond
+	return b.wait + jitter(b.maxJitter)
+}
+
+func jitter(maxJitter time.Duration) time.Duration {
+	if maxJitter <= 0 {
+		return 0
+	}
+	return time.Duration(rand.Int63n(int64(maxJitter)))
 }
 
 type exponentialBackoff struct {
-	exponentFactor        float64
-	initialWait           float64
-	maxWait               float64
-	maximumJitterInterval int64
+	minWait   time.Duration
+	maxWait   time.Duration
+	maxJitter time.Duration
 }
+
+const limitDuration time.Duration = 1<<63 - 1
 
 // Next returns next duration to wait before the next attempt.
 func (b *exponentialBackoff) Next(attempt int) time.Duration {
 	if attempt <= 0 {
 		return 0 * time.Millisecond
 	}
-	delay := math.Min(b.initialWait+math.Pow(b.exponentFactor, float64(attempt)), b.maxWait)
-	jitter := float64(rand.Int63n(b.maximumJitterInterval))
-	return time.Duration(delay+jitter) * time.Millisecond
+	// Make sure we don't overflow the time.Duration (int64)
+	wait := float64(b.minWait) * math.Pow(2.0, float64(attempt-1)) // nolint
+	if float64(limitDuration) < wait {
+		return b.maxWait
+	}
+	return minDuration(time.Duration(wait)+jitter(b.maxJitter), b.maxWait)
+}
+
+func minDuration(d1, d2 time.Duration) time.Duration {
+	if d1 < d2 {
+		return d1
+	}
+	return d2
+}
+
+func maxDuration(d1, d2 time.Duration) time.Duration {
+	if d1 < d2 {
+		return d2
+	}
+	return d1
 }
 
 // NewExponentialBackoff returns an instance of ExponentialBackoff.
-func NewExponentialBackoff(
-	initialWait time.Duration,
-	maxWait time.Duration,
-	exponentFactor float64,
-	maximumJitterInterval time.Duration,
-) Backoff {
+func NewExponentialBackoff(minWait, maxWait, maxJitter time.Duration) Backoff {
 	return &exponentialBackoff{
-		exponentFactor:        exponentFactor,
-		initialWait:           float64(initialWait / time.Millisecond),
-		maxWait:               float64(maxWait / time.Millisecond),
-		maximumJitterInterval: int64(maximumJitterInterval / time.Millisecond),
+		minWait:   maxDuration(minWait, 0),
+		maxWait:   maxDuration(maxWait, 0),
+		maxJitter: maxDuration(maxJitter, 0),
 	}
 }

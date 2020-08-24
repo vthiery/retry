@@ -102,7 +102,6 @@ func BenchmarkRetryDo(b *testing.B) {
 			NewExponentialBackoff(
 				2*time.Millisecond,
 				10*time.Millisecond,
-				2.0,
 				2*time.Millisecond,
 			),
 		),

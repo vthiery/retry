@@ -5,6 +5,7 @@
 [![GoReportCard example](https://goreportcard.com/badge/github.com/vthiery/retry)](https://goreportcard.com/report/github.com/vthiery/retry)
 ![Build Status](https://github.com/vthiery/retry/workflows/Test/badge.svg)
 ![GolangCI Lint](https://github.com/vthiery/retry/workflows/GolangCI/badge.svg)
+![License](https://img.shields.io/github/license/vthiery/retry)
 
 ## Description
 
@@ -36,10 +37,9 @@ func main() {
 		retry.WithMaxAttempts(10),
 		retry.WithBackoff(
 			retry.NewExponentialBackoff(
-				100*time.Millisecond, // initialWait
+				100*time.Millisecond, // minWait
 				1*time.Second,        // maxWait
-				2.0,                  // exponentFactor
-				2*time.Millisecond,   // maximumJitterInterval
+				2*time.Millisecond,   // maxJitter
 			),
 		),
 	)
