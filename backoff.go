@@ -59,7 +59,7 @@ func (b *exponentialBackoff) Next(attempt int) time.Duration {
 	return minDuration(time.Duration(wait)+jitter(b.maxJitter), b.maxWait)
 }
 
-func minDuration(d1 time.Duration, d2 time.Duration) time.Duration {
+func minDuration(d1, d2 time.Duration) time.Duration {
 	if d1 < d2 {
 		return d1
 	}
@@ -67,11 +67,7 @@ func minDuration(d1 time.Duration, d2 time.Duration) time.Duration {
 }
 
 // NewExponentialBackoff returns an instance of ExponentialBackoff.
-func NewExponentialBackoff(
-	minWait time.Duration,
-	maxWait time.Duration,
-	maxJitter time.Duration,
-) Backoff {
+func NewExponentialBackoff(minWait, maxWait, maxJitter time.Duration) Backoff {
 	return &exponentialBackoff{
 		minWait:   minWait,
 		maxWait:   maxWait,
