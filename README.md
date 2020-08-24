@@ -1,6 +1,8 @@
 # Retry
 
-[![PkgGoDev](https://pkg.go.dev/badge/vthiery/retry)](https://pkg.go.dev/vthiery/retry)
+[![PkgGoDev](https://pkg.go.dev/badge/vthiery/retry)](https://pkg.go.dev/github.com/vthiery/retry)
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/vthiery/retry.svg)](https://github.com/vthiery/retry)
+[![GoReportCard example](https://goreportcard.com/badge/github.com/vthiery/retry)](https://goreportcard.com/report/github.com/vthiery/retry)
 ![Build Status](https://github.com/vthiery/retry/workflows/Test/badge.svg)
 ![GolangCI Lint](https://github.com/vthiery/retry/workflows/GolangCI/badge.svg)
 
