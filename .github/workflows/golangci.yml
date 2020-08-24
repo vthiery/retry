@@ -1,0 +1,13 @@
+name: GolangCI
+on: [pull_request]
+jobs:
+  golangci-lint:
+    name: runner / golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v2.0.0
+        with:
+          version: v1.28
