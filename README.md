@@ -49,7 +49,7 @@ func main() {
 	defer cancel()
 
 	// Define the function that can be retried
-	fn := func() error {
+	fn := func(ctx context.Context) error {
 		fmt.Println("doing something...")
 		return errors.New("actually, can't do it 🤦")
 	}

@@ -32,7 +32,7 @@ func (e *NoAttemptsAllowedError) Error() string {
 // Do attempts to execute the function `fn` until the amount of attempts is
 // exhausted and wait between attempts according to the backoff strategy
 // set on Retry.
-func (r *Retry) Do(ctx context.Context, fn func() error) error {
+func (r *Retry) Do(ctx context.Context, fn func(context.Context) error) error {
 	if r.maxAttempts != nil && *r.maxAttempts < 1 {
 		return &NoAttemptsAllowedError{
 			MaxAttempts: *r.maxAttempts,
@@ -41,13 +41,11 @@ func (r *Retry) Do(ctx context.Context, fn func() error) error {
 
 	attempt := 0
 	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
+		if err := ctx.Err(); err != nil {
+			return err
 		}
 
-		if err := fn(); err != nil {
+		if err := fn(ctx); err != nil {
 			attempt++
 			if r.maxAttempts != nil && attempt == *r.maxAttempts {
 				return fmt.Errorf("all attempts have been exhausted, finished with error: %w", err)
