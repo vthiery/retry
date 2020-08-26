@@ -15,7 +15,7 @@ func TestRetryDo(t *testing.T) {
 	)
 
 	attempt := 0
-	assert.NoError(t, r.Do(context.Background(), func() error {
+	assert.NoError(t, r.Do(context.Background(), func(context.Context) error {
 		attempt++
 		return failFirstAttempts(3)(attempt)
 	}))
@@ -38,7 +38,7 @@ func TestRetryDoNoAttempts(t *testing.T) {
 		WithMaxAttempts(0),
 	)
 
-	assert.Error(t, r.Do(context.Background(), func() error {
+	assert.Error(t, r.Do(context.Background(), func(context.Context) error {
 		return nil
 	}))
 }
@@ -49,7 +49,7 @@ func TestRetryDoNoRetry(t *testing.T) {
 	)
 
 	attempt := 0
-	assert.Error(t, r.Do(context.Background(), func() error {
+	assert.Error(t, r.Do(context.Background(), func(context.Context) error {
 		attempt++
 		return errFailAttempt
 	}))
@@ -65,7 +65,7 @@ func TestRetryDoWithCancelledContext(t *testing.T) {
 		cancel()
 	}()
 
-	err := r.Do(ctx, func() error {
+	err := r.Do(ctx, func(context.Context) error {
 		time.Sleep(100 * time.Millisecond)
 		return errFailAttempt
 	})
@@ -80,7 +80,7 @@ func TestRetryDoWithBackoff(t *testing.T) {
 	)
 
 	attempt := 0
-	assert.NoError(t, r.Do(context.Background(), func() error {
+	assert.NoError(t, r.Do(context.Background(), func(context.Context) error {
 		attempt++
 		return failFirstAttempts(3)(attempt)
 	}))
@@ -111,7 +111,7 @@ func BenchmarkRetryDo(b *testing.B) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		attempt := 0
-		assert.NoError(b, r.Do(context.Background(), func() error {
+		assert.NoError(b, r.Do(context.Background(), func(context.Context) error {
 			attempt++
 			return fn(attempt)
 		}))
