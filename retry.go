@@ -48,7 +48,7 @@ func (r *Retry) Do(ctx context.Context, fn func(context.Context) error) error {
 	for {
 		if err := fn(ctx); err != nil {
 			if !r.policy(err) {
-				return fmt.Errorf("got a non-retryable: %w", err)
+				return fmt.Errorf("got a non-retryable error: %w", err)
 			}
 			attempt++
 			if r.exhaustedAttempts(attempt) {
