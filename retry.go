@@ -25,7 +25,7 @@ type Backoff interface {
 }
 
 // Policy describes the retry policy based on the error.
-// It should return true for retryable errors and false otherwise.
+// It must return true for retryable errors and false otherwise.
 type Policy func(err error) bool
 
 // NoAttemptsAllowedError is used to signal that no attempts are allowed.
