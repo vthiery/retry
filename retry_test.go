@@ -56,6 +56,23 @@ func TestRetryDoNoRetry(t *testing.T) {
 	assert.Equal(t, 1, attempt)
 }
 
+func TestRetryExhaustedAttempts(t *testing.T) {
+	r := New(
+		WithMaxAttempts(3),
+	)
+	assert.False(t, r.exhaustedAttempts(0))
+	assert.False(t, r.exhaustedAttempts(1))
+	assert.False(t, r.exhaustedAttempts(2))
+	assert.True(t, r.exhaustedAttempts(3))
+	assert.True(t, r.exhaustedAttempts(4))
+	assert.True(t, r.exhaustedAttempts(5))
+}
+
+func TestRetryExhaustedAttemptsSingle(t *testing.T) {
+	r := New()
+	assert.False(t, r.exhaustedAttempts(100000))
+}
+
 func TestRetryDoWithCancelledContext(t *testing.T) {
 	r := New()
 
@@ -69,8 +86,55 @@ func TestRetryDoWithCancelledContext(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 		return errFailAttempt
 	})
-	assert.Error(t, err)
-	assert.Equal(t, "context canceled", err.Error())
+	assert.True(t, errors.Is(err, context.Canceled))
+}
+
+type longBackoff struct {
+}
+
+func (b longBackoff) Next(attempt int) time.Duration {
+	return time.Hour
+}
+
+func TestRetryWaitBackoffTime(t *testing.T) {
+	r := New(
+		WithBackoff(&longBackoff{}),
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		cancel()
+	}()
+
+	err := r.waitBackoffTime(ctx, 1)
+	assert.True(t, errors.Is(err, context.Canceled))
+}
+
+func TestRetryWaitBackoffTimeNoBackoff(t *testing.T) {
+	r := New()
+	assert.NoError(t, r.waitBackoffTime(context.Background(), 1))
+}
+
+func TestWait(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		cancel()
+	}()
+
+	assert.NoError(t, wait(ctx, 10*time.Millisecond))
+}
+
+func TestWaitWithCancelledContext(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		cancel()
+	}()
+
+	err := wait(ctx, 1*time.Hour)
+	assert.True(t, errors.Is(err, context.Canceled))
 }
 
 func TestRetryDoWithBackoff(t *testing.T) {
@@ -85,6 +149,24 @@ func TestRetryDoWithBackoff(t *testing.T) {
 		return failFirstAttempts(3)(attempt)
 	}))
 	assert.Equal(t, 3, attempt)
+}
+
+func TestRetryDoWithEarlyCancelledContext(t *testing.T) {
+	r := New(
+		WithMaxAttempts(10),
+		WithBackoff(&longBackoff{}),
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		cancel()
+	}()
+
+	err := r.Do(ctx, func(context.Context) error {
+		return errFailAttempt
+	})
+	assert.True(t, errors.Is(err, context.Canceled))
 }
 
 func TestNoAttemptsAllowedError(t *testing.T) {
