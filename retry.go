@@ -8,6 +8,10 @@ import (
 
 // Retry allows to retry a function until the amount of attempts is exhausted,
 // using a backoff mechanism to wait between successive attempts.
+// By default, there retrier will:
+//     * attempts ad infinitum
+//     * not observe wait between successive attempts
+//     * retry on all errors
 type Retry struct {
 	maxAttempts *int
 	backoff     Backoff
