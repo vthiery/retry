@@ -73,6 +73,22 @@ func TestRetryExhaustedAttemptsSingle(t *testing.T) {
 	assert.False(t, r.exhaustedAttempts(100000))
 }
 
+func TestRetryDoWithCancelledContext(t *testing.T) {
+	r := New()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(1 * time.Second)
+		cancel()
+	}()
+
+	err := r.Do(ctx, func(context.Context) error {
+		time.Sleep(100 * time.Millisecond)
+		return errFailAttempt
+	})
+	assert.True(t, errors.Is(err, context.Canceled))
+}
+
 type failBackoff struct {
 	t *testing.T
 }
@@ -82,7 +98,7 @@ func (b failBackoff) Next(attempt int) time.Duration {
 	return time.Second
 }
 
-func TestRetryDoWithCancelledContext(t *testing.T) {
+func TestRetryDoWithEarlyCancelledContext(t *testing.T) {
 	r := New(
 		WithMaxAttempts(10),
 		WithBackoff(&failBackoff{t}),
