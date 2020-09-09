@@ -11,6 +11,7 @@ import (
 type Retry struct {
 	maxAttempts *int
 	backoff     Backoff
+	policy      Policy
 }
 
 // Backoff describes the backoff interface.
@@ -18,6 +19,10 @@ type Backoff interface {
 	// Next returns the duration to wait before performing the next attempt.
 	Next(attempt int) time.Duration
 }
+
+// Policy describes the retry policy based on the error.
+// It should return true for retryable errors and false otherwise.
+type Policy func(err error) bool
 
 // NoAttemptsAllowedError is used to signal that no attempts are allowed.
 type NoAttemptsAllowedError struct {
@@ -42,6 +47,9 @@ func (r *Retry) Do(ctx context.Context, fn func(context.Context) error) error {
 	attempt := 0
 	for {
 		if err := fn(ctx); err != nil {
+			if !r.policy(err) {
+				return fmt.Errorf("got a non-retryable: %w", err)
+			}
 			attempt++
 			if r.exhaustedAttempts(attempt) {
 				return fmt.Errorf("all attempts have been exhausted, finished with error: %w", err)
@@ -95,15 +103,27 @@ func WithBackoff(backoff Backoff) Option {
 	}
 }
 
+// WithPolicy sets the retry policy.
+func WithPolicy(policy Policy) Option {
+	return func(r *Retry) {
+		r.policy = policy
+	}
+}
+
 // New creates an instance of Retry.
 // By defaults, there is no retry limit and no backoff.
 func New(opts ...Option) *Retry {
 	r := &Retry{
 		maxAttempts: nil,
 		backoff:     nil,
+		policy:      defaultPolicy,
 	}
 	for _, opt := range opts {
 		opt(r)
 	}
 	return r
+}
+
+func defaultPolicy(err error) bool {
+	return true
 }

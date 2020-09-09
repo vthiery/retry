@@ -176,6 +176,26 @@ func TestNoAttemptsAllowedError(t *testing.T) {
 	assert.Equal(t, "no attempts are allowed with max attempts set to 0", err.Error())
 }
 
+var errNonRetryable = errors.New("a non-retryable error")
+
+func TestRetryDoWithPolicy(t *testing.T) {
+	r := New(
+		WithMaxAttempts(3),
+		WithPolicy(
+			func(err error) bool {
+				return !errors.Is(err, errNonRetryable)
+			},
+		),
+	)
+	attempt := 0
+	err := r.Do(context.Background(), func(context.Context) error {
+		attempt++
+		return errNonRetryable
+	})
+	assert.True(t, errors.Is(err, errNonRetryable))
+	assert.Equal(t, 1, attempt)
+}
+
 func BenchmarkRetryDo(b *testing.B) {
 	maxAttempts := 5
 	r := New(
