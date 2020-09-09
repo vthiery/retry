@@ -89,29 +89,26 @@ func TestRetryDoWithCancelledContext(t *testing.T) {
 	assert.True(t, errors.Is(err, context.Canceled))
 }
 
-type failBackoff struct {
-	t *testing.T
+type longBackoff struct {
 }
 
-func (b failBackoff) Next(attempt int) time.Duration {
-	b.t.Fatalf("this backoff should never be called")
-	return time.Second
+func (b longBackoff) Next(attempt int) time.Duration {
+	return time.Hour
 }
 
 func TestRetryDoWithEarlyCancelledContext(t *testing.T) {
 	r := New(
 		WithMaxAttempts(10),
-		WithBackoff(&failBackoff{t}),
+		WithBackoff(&longBackoff{}),
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		cancel()
 	}()
 
 	err := r.Do(ctx, func(context.Context) error {
-		time.Sleep(100 * time.Millisecond)
 		return errFailAttempt
 	})
 	assert.True(t, errors.Is(err, context.Canceled))

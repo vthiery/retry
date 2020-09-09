@@ -42,16 +42,12 @@ func (r *Retry) Do(ctx context.Context, fn func(context.Context) error) error {
 	attempt := 0
 	for {
 		if err := fn(ctx); err != nil {
-			if err := ctx.Err(); err != nil {
-				return err
-			}
-
 			attempt++
 			if r.exhaustedAttempts(attempt) {
 				return fmt.Errorf("all attempts have been exhausted, finished with error: %w", err)
 			}
-			if r.backoff != nil {
-				time.Sleep(r.backoff.Next(attempt))
+			if err := r.waitBackoffTime(ctx, attempt); err != nil {
+				return err
 			}
 			continue
 		}
@@ -61,6 +57,22 @@ func (r *Retry) Do(ctx context.Context, fn func(context.Context) error) error {
 
 func (r Retry) exhaustedAttempts(attempt int) bool {
 	return r.maxAttempts != nil && attempt >= *r.maxAttempts
+}
+
+func (r Retry) waitBackoffTime(ctx context.Context, attempt int) error {
+	if r.backoff == nil {
+		return ctx.Err()
+	}
+
+	waitCtx, cancel := context.WithTimeout(ctx, r.backoff.Next(attempt))
+	defer cancel()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-waitCtx.Done():
+		return nil
+	}
 }
 
 // Option is an option to add to the Retry.
