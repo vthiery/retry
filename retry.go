@@ -50,6 +50,7 @@ func (r *Retry) Do(ctx context.Context, fn func(context.Context) error) error {
 			if !r.policy(err) {
 				return fmt.Errorf("got a non-retryable error: %w", err)
 			}
+
 			attempt++
 			if r.exhaustedAttempts(attempt) {
 				return fmt.Errorf("all attempts have been exhausted, finished with error: %w", err)
