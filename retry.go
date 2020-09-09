@@ -64,6 +64,7 @@ func (r Retry) waitBackoffTime(ctx context.Context, attempt int) error {
 		return ctx.Err()
 	}
 
+	// Wait until the context is cancelled or until the backoff wait is over
 	waitCtx, cancel := context.WithTimeout(ctx, r.backoff.Next(attempt))
 	defer cancel()
 
