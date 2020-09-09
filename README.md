@@ -31,6 +31,8 @@ import (
 	"github.com/vthiery/retry"
 )
 
+var nonRetryableError = errors.New("a non-retryable error")
+
 func main() {
 	// Define the retry strategy, with 10 attempts and an exponential backoff
 	retry := retry.New(
@@ -41,6 +43,11 @@ func main() {
 				1*time.Second,        // maxWait
 				2*time.Millisecond,   // maxJitter
 			),
+		),
+		retry.WithPolicy(
+			func(err error) bool {
+				return !errors.Is(err, nonRetryableError)
+			},
 		),
 	)
 
