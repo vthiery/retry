@@ -35,7 +35,7 @@ func jitter(maxJitter time.Duration) time.Duration {
 	if maxJitter <= 0 {
 		return 0
 	}
-	return time.Duration(rand.Int63n(int64(maxJitter)))
+	return time.Duration(rand.Int63n(int64(maxJitter))) // nolint:gosec
 }
 
 type exponentialBackoff struct {
