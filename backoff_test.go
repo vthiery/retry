@@ -10,6 +10,8 @@ import (
 const zeroDuration = time.Duration(0)
 
 func TestConstantBackoffNext(t *testing.T) {
+	t.Parallel()
+
 	wait := 100 * time.Millisecond
 	maxJitter := 50 * time.Millisecond
 	backoff := NewConstantBackoff(wait, maxJitter)
@@ -24,6 +26,8 @@ func TestConstantBackoffNext(t *testing.T) {
 }
 
 func TestConstantBackoffNextNoJitter(t *testing.T) {
+	t.Parallel()
+
 	wait := 100 * time.Millisecond
 	backoff := NewConstantBackoff(wait, 0)
 
@@ -35,6 +39,8 @@ func TestConstantBackoffNextNoJitter(t *testing.T) {
 }
 
 func TestConstantBackoffNextNegativeDurations(t *testing.T) {
+	t.Parallel()
+
 	wait := -100 * time.Millisecond
 	maxJitter := -50 * time.Millisecond
 	backoff := NewConstantBackoff(wait, maxJitter)
@@ -45,6 +51,8 @@ func TestConstantBackoffNextNegativeDurations(t *testing.T) {
 }
 
 func TestExponentialBackoffNext(t *testing.T) {
+	t.Parallel()
+
 	minWait := 2 * time.Millisecond
 	maxWait := 10 * time.Millisecond
 	maxJitter := 1 * time.Millisecond
@@ -72,6 +80,8 @@ func TestExponentialBackoffNext(t *testing.T) {
 }
 
 func TestExponentialBackoffNextNoJitter(t *testing.T) {
+	t.Parallel()
+
 	minWait := 2 * time.Millisecond
 	maxWait := 10 * time.Millisecond
 	backoff := NewExponentialBackoff(minWait, maxWait, 0)
@@ -88,6 +98,8 @@ func TestExponentialBackoffNextNoJitter(t *testing.T) {
 }
 
 func TestExponentialBackoffNextNegativeDurations(t *testing.T) {
+	t.Parallel()
+
 	minWait := -2 * time.Millisecond
 	maxWait := -10 * time.Millisecond
 	maxJitter := -1 * time.Millisecond
@@ -99,6 +111,8 @@ func TestExponentialBackoffNextNegativeDurations(t *testing.T) {
 }
 
 func TestJitter(t *testing.T) {
+	t.Parallel()
+
 	assert.Equal(t, zeroDuration, jitter(time.Duration(-42)))
 	assert.Equal(t, zeroDuration, jitter(zeroDuration))
 
@@ -106,6 +120,8 @@ func TestJitter(t *testing.T) {
 }
 
 func TestMinDuration(t *testing.T) {
+	t.Parallel()
+
 	d1 := time.Duration(42)
 	d2 := time.Duration(666)
 
@@ -114,6 +130,8 @@ func TestMinDuration(t *testing.T) {
 }
 
 func TestMaxDuration(t *testing.T) {
+	t.Parallel()
+
 	d1 := time.Duration(42)
 	d2 := time.Duration(666)
 

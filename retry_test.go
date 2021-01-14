@@ -10,6 +10,8 @@ import (
 )
 
 func TestRetryDo(t *testing.T) {
+	t.Parallel()
+
 	r := New(
 		WithMaxAttempts(3),
 	)
@@ -34,6 +36,8 @@ func failFirstAttempts(numberOfFailures int) func(int) error {
 }
 
 func TestRetryDoNoAttempts(t *testing.T) {
+	t.Parallel()
+
 	r := New(
 		WithMaxAttempts(0),
 	)
@@ -44,6 +48,8 @@ func TestRetryDoNoAttempts(t *testing.T) {
 }
 
 func TestRetryDoNoRetry(t *testing.T) {
+	t.Parallel()
+
 	r := New(
 		WithMaxAttempts(1),
 	)
@@ -57,6 +63,8 @@ func TestRetryDoNoRetry(t *testing.T) {
 }
 
 func TestRetryExhaustedAttempts(t *testing.T) {
+	t.Parallel()
+
 	r := New(
 		WithMaxAttempts(3),
 	)
@@ -69,11 +77,15 @@ func TestRetryExhaustedAttempts(t *testing.T) {
 }
 
 func TestRetryExhaustedAttemptsSingle(t *testing.T) {
+	t.Parallel()
+
 	r := New()
 	assert.False(t, r.exhaustedAttempts(100000))
 }
 
 func TestRetryDoWithCancelledContext(t *testing.T) {
+	t.Parallel()
+
 	r := New()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -97,6 +109,8 @@ func (b longBackoff) Next(attempt int) time.Duration {
 }
 
 func TestRetryWaitBackoffTime(t *testing.T) {
+	t.Parallel()
+
 	r := New(
 		WithBackoff(&longBackoff{}),
 	)
@@ -112,11 +126,15 @@ func TestRetryWaitBackoffTime(t *testing.T) {
 }
 
 func TestRetryWaitBackoffTimeNoBackoff(t *testing.T) {
+	t.Parallel()
+
 	r := New()
 	assert.NoError(t, r.waitBackoffTime(context.Background(), 1))
 }
 
 func TestWait(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		time.Sleep(100 * time.Millisecond)
@@ -127,6 +145,8 @@ func TestWait(t *testing.T) {
 }
 
 func TestWaitWithCancelledContext(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		time.Sleep(100 * time.Millisecond)
@@ -138,6 +158,8 @@ func TestWaitWithCancelledContext(t *testing.T) {
 }
 
 func TestRetryDoWithBackoff(t *testing.T) {
+	t.Parallel()
+
 	r := New(
 		WithMaxAttempts(3),
 		WithBackoff(NewConstantBackoff(2*time.Millisecond, 1*time.Millisecond)),
@@ -152,6 +174,8 @@ func TestRetryDoWithBackoff(t *testing.T) {
 }
 
 func TestRetryDoWithEarlyCancelledContext(t *testing.T) {
+	t.Parallel()
+
 	r := New(
 		WithMaxAttempts(10),
 		WithBackoff(&longBackoff{}),
@@ -170,6 +194,8 @@ func TestRetryDoWithEarlyCancelledContext(t *testing.T) {
 }
 
 func TestNoAttemptsAllowedError(t *testing.T) {
+	t.Parallel()
+
 	err := NoAttemptsAllowedError{
 		MaxAttempts: 0,
 	}
@@ -179,6 +205,8 @@ func TestNoAttemptsAllowedError(t *testing.T) {
 var errNonRetryable = errors.New("a non-retryable error")
 
 func TestRetryDoWithPolicy(t *testing.T) {
+	t.Parallel()
+
 	r := New(
 		WithMaxAttempts(3),
 		WithPolicy(
