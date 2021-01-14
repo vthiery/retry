@@ -1,5 +1,6 @@
-on: [push, pull_request]
 name: Test
+
+on: [push, pull_request]
 jobs:
   test:
     strategy:
@@ -8,11 +9,13 @@ jobs:
         platform: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
-      - name: Install Go
-        uses: actions/setup-go@v2.1.2
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+
       - name: Run tests
         run: go test -race ./...
