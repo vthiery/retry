@@ -101,8 +101,7 @@ func TestRetryDoWithCancelledContext(t *testing.T) {
 	assert.True(t, errors.Is(err, context.Canceled))
 }
 
-type longBackoff struct {
-}
+type longBackoff struct{}
 
 func (b longBackoff) Next(attempt int) time.Duration {
 	return time.Hour
