@@ -1,10 +1,10 @@
 # Retry
 
 [![PkgGoDev](https://pkg.go.dev/badge/vthiery/retry)](https://pkg.go.dev/github.com/vthiery/retry)
-[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/vthiery/retry.svg)](https://github.com/vthiery/retry)
+[![Go version](https://img.shields.io/github/go-mod/go-version/vthiery/retry.svg)](https://github.com/vthiery/retry)
 [![GoReportCard example](https://goreportcard.com/badge/github.com/vthiery/retry)](https://goreportcard.com/report/github.com/vthiery/retry)
-![Build Status](https://github.com/vthiery/retry/workflows/Test/badge.svg)
-![GolangCI Lint](https://github.com/vthiery/retry/workflows/GolangCI/badge.svg)
+[![Test Status](https://img.shields.io/github/workflow/status/vthiery/retry/Test?label=Tests)](https://github.com/vthiery/retry/workflows/Test/badge.svg)
+[![GolangCI Lint](https://img.shields.io/github/workflow/status/vthiery/retry/Golangci-Lint?label=Lint)](https://github.com/vthiery/retry/workflows/Golangci-Lint/badge.svg)
 ![License](https://img.shields.io/github/license/vthiery/retry)
 
 ## Description
