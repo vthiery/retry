@@ -38,10 +38,10 @@ func (e *NoAttemptsAllowedError) Error() string {
 	return fmt.Sprintf("no attempts are allowed with max attempts set to %d", e.MaxAttempts)
 }
 
-// Do attempts to execute the function `fn` until the amount of attempts is
+// Do attempts to execute the function `operation` until the amount of attempts is
 // exhausted and wait between attempts according to the backoff strategy
 // set on Retry.
-func (r *Retry) Do(ctx context.Context, fn func(context.Context) error) error {
+func (r *Retry) Do(ctx context.Context, operation func(context.Context) error) error {
 	if r.maxAttempts != nil && *r.maxAttempts < 1 {
 		return &NoAttemptsAllowedError{
 			MaxAttempts: *r.maxAttempts,
@@ -50,7 +50,7 @@ func (r *Retry) Do(ctx context.Context, fn func(context.Context) error) error {
 
 	attempt := 0
 	for {
-		if err := fn(ctx); err != nil {
+		if err := operation(ctx); err != nil {
 			if !r.policy(err) {
 				return fmt.Errorf("got a non-retryable error: %w", err)
 			}
@@ -59,11 +59,14 @@ func (r *Retry) Do(ctx context.Context, fn func(context.Context) error) error {
 			if r.exhaustedAttempts(attempt) {
 				return fmt.Errorf("all attempts have been exhausted, finished with error: %w", err)
 			}
+
 			if err := r.waitBackoffTime(ctx, attempt); err != nil {
 				return err
 			}
+
 			continue
 		}
+
 		return nil
 	}
 }
@@ -76,6 +79,7 @@ func (r Retry) waitBackoffTime(ctx context.Context, attempt int) error {
 	if r.backoff == nil {
 		return ctx.Err()
 	}
+
 	return wait(ctx, r.backoff.Next(attempt))
 }
 
@@ -118,15 +122,16 @@ func WithPolicy(policy Policy) Option {
 // New creates an instance of Retry.
 // By defaults, there is no retry limit and no backoff.
 func New(opts ...Option) *Retry {
-	r := &Retry{
+	retry := &Retry{
 		maxAttempts: nil,
 		backoff:     nil,
 		policy:      defaultPolicy,
 	}
 	for _, opt := range opts {
-		opt(r)
+		opt(retry)
 	}
-	return r
+
+	return retry
 }
 
 func defaultPolicy(err error) bool {
