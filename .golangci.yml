@@ -1,8 +1,10 @@
+run:
+  go: 1.18
+
 linters:
   enable-all: true
   disable:
     - gochecknoinits
-    - nlreturn
     - wsl
 
 issues:

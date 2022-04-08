@@ -28,6 +28,7 @@ func (b *constantBackoff) Next(attempt int) time.Duration {
 	if attempt <= 0 {
 		return 0 * time.Millisecond
 	}
+
 	return b.wait + jitter(b.maxJitter)
 }
 
@@ -35,6 +36,7 @@ func jitter(maxJitter time.Duration) time.Duration {
 	if maxJitter <= 0 {
 		return 0
 	}
+
 	return time.Duration(rand.Int63n(int64(maxJitter))) // nolint:gosec
 }
 
@@ -56,6 +58,7 @@ func (b *exponentialBackoff) Next(attempt int) time.Duration {
 	if float64(limitDuration) < wait {
 		return b.maxWait
 	}
+
 	return minDuration(time.Duration(wait)+jitter(b.maxJitter), b.maxWait)
 }
 
@@ -63,6 +66,7 @@ func minDuration(d1, d2 time.Duration) time.Duration {
 	if d1 < d2 {
 		return d1
 	}
+
 	return d2
 }
 
@@ -70,6 +74,7 @@ func maxDuration(d1, d2 time.Duration) time.Duration {
 	if d1 < d2 {
 		return d2
 	}
+
 	return d1
 }
 

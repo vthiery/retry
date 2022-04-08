@@ -55,13 +55,13 @@ func main() {
 	defer cancel()
 
 	// Define the function that can be retried
-	fn := func(ctx context.Context) error {
+	operation := func(ctx context.Context) error {
 		fmt.Println("doing something...")
 		return errors.New("actually, can't do it 🤦")
 	}
 
 	// Call the `retry.Do` to attempt to perform `fn`
-	if err := retry.Do(ctx, fn); err != nil {
+	if err := retry.Do(ctx, operation); err != nil {
 		fmt.Printf("failed to perform `fn`: %v\n", err)
 	}
 }
