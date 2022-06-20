@@ -5,6 +5,8 @@ linters:
   enable-all: true
   disable:
     - gochecknoinits
+    - ireturn
+    - wrapcheck
     - wsl
 
 issues:
